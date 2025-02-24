@@ -1,0 +1,28 @@
+# Basic dependencies
+biopython>=1.80
+pandas>=2.0.0
+tqdm>=4.65.0
+requests>=2.28.0
+
+# Data processing and analysis
+numpy>=1.24.0
+scipy>=1.10.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+networkx>=3.0
+
+# Natural language processing
+nltk>=3.8.0
+wordcloud>=1.9.0
+
+# Other tools
+pyyaml>=6.0.0
+python-dotenv>=1.0.0
+colorama>=0.4.6
+
+# Windows specific dependencies
+PyQt5>=5.15.0; sys_platform == 'win32'
+
+# Optional dependencies for better performance
+psutil>=5.9.0
+openpyxl>=3.0.0

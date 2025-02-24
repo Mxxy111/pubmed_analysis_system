@@ -1,0 +1,99 @@
+# 文献分析系统配置文件
+
+# API设置
+api:
+  deepseek: # DeepSeek官网
+    endpoint: "https://api.deepseek.com/v1" #api端点
+    api_key: "your_api_key_here" #api密钥
+    model: deepseek-ai/DeepSeek-V3 # 模型名称
+    max_tokens: 4096 # 最大token数
+    temperature: 0.7 
+    top_p: 0.7
+  volces: # 火山引擎
+    endpoint: "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
+    api_key: "your_api_key_here"
+    model: "ep—xxx"
+    max_tokens: 8186
+    temperature: 0.7
+    top_p: 0.7
+  gpt: #OpenAI
+    endpoint: "https://api.openai.com/v1"
+    api_key: "your_api_key_here"
+    model: "gpt-4"
+    max_tokens: 4096
+    temperature: 0.7
+    top_p: 0.7
+  mesh_query: #mesh检索式生成专用API，可以根据需要自行添加
+    endpoint: "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
+    api_key: "your_api_key_here"
+    model: "model ID"
+    max_tokens: 2048
+    temperature: 0.3
+    top_p: 0.9
+  # 可以添加其他模型的配置
+  active_model: "volces"  # literature_analysis.py和advanced_analysis.py使用的默认模型
+  mesh_query_model: "mesh_query"  # DeepSeek.py专用的API配置
+
+# PubMed设置
+pubmed:
+  email: "your email "  # PubMed API访问邮箱
+
+# 文献筛选设置
+filters:
+  default_year_range: [2019, 2024]  # 默认年份范围
+  min_citation_count: 5  # 最低引用次数
+  journal_categories:  # 期刊类别
+    - SCI
+    - SSCI
+  article_types:  # 文章类型
+    - Original Research
+    - Review
+    - Meta Analysis
+    - Clinical Trial
+
+# 可视化分析设置
+visualization:
+  keyword_analysis:
+    top_n: 20  # 展示前N个关键词
+    min_frequency: 3  # 最小出现频次
+    plot_type: bar  # 可选：bar, wordcloud
+    
+  author_network:
+    min_collaboration: 2  # 最小合作次数
+    max_authors: 50  # 网络图中显示的最大作者数
+    layout: spring  # 网络布局类型
+    
+  trend_analysis:
+    time_unit: year  # 时间单位：year/month
+    plot_type: line  # 可选：line, bar
+    include_forecast: true  # 是否包含趋势预测
+
+# 文献解读设置
+analysis:
+  sections:  # 需要分析的章节
+    - background
+    - methods
+    - results
+    - conclusions
+  comparison_metrics:  # 文献对比维度
+    - research_design
+    - sample_size
+    - key_findings
+    - limitations
+  language: zh  # 输出语言：zh/en
+
+# 自动更新设置
+auto_update:
+  enabled: true
+  frequency: weekly  # 更新频率：daily/weekly/monthly
+  notification:  # 更新通知方式
+    email: true
+    report: true
+  update_threshold: 5  # 最小更新文献数量阈值
+
+# 输出设置
+output:
+  format: markdown  # 输出格式：markdown/pdf/html
+  save_path: ./results/  # 结果保存路径
+  file_naming: "{research_area}_{date}"  # 文件命名格式
+  include_metadata: true  # 是否包含元数据

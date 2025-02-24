@@ -1,0 +1,68 @@
+# 文献分析系统配置文件
+
+# API设置
+api:
+  deepseek:
+    model: deepseek-ai/DeepSeek-V3 # 自行替换模型
+    max_tokens: 4096
+    temperature: 0.7
+    top_p: 0.7
+    api_key: "YOUR_API_KEY_HERE"  # 替换为您的DeepSeek API密钥
+
+# PubMed设置
+pubmed:
+  email: "YOUR_EMAIL@example.com"  # 替换为您的邮箱地址
+
+# 文献筛选设置
+filters:
+  default_year_range: [2019, 2024]  # 默认年份范围
+  min_citation_count: 5  # 最低引用次数
+  journal_categories:  # 期刊类别
+    - SCI
+    - SSCI
+  article_types:  # 文章类型
+    - Original Research
+    - Review
+    - Meta Analysis
+    - Clinical Trial
+
+# 可视化分析设置
+visualization:
+  keyword_analysis:
+    top_n: 20  # 展示前N个关键词
+    min_frequency: 3  # 最小出现频次
+    plot_type: bar  # 可选：bar, wordcloud
+    
+  author_network:
+    min_collaboration: 2  # 最小合作次数
+    max_authors: 50  # 网络图中显示的最大作者数
+    layout: spring  # 网络布局类型
+    
+  trend_analysis:
+    time_unit: year  # 时间单位：year/month
+    plot_type: line  # 可选：line, bar
+    include_forecast: true  # 是否包含趋势预测
+
+# 文献解读设置
+analysis:
+  sections:  # 需要分析的章节
+    - background
+    - methods
+    - results
+    - discussion
+    - conclusion
+  
+  output_formats:  # 输出格式选项
+    - json
+    - markdown
+    - txt
+    - csv
+
+# 系统设置
+system:
+  language: zh_CN  # 界面语言：zh_CN/en_US
+  max_retries: 3  # API调用最大重试次数
+  timeout: 30  # API调用超时时间（秒）
+  cache_enabled: true  # 是否启用缓存
+  cache_dir: "./cache"  # 缓存目录
+  log_level: INFO  # 日志级别：DEBUG/INFO/WARNING/ERROR
