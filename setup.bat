@@ -9,6 +9,24 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
+REM 检查venv目录是否存在
+if not exist venv (
+    echo 正在创建虚拟环境...
+    python -m venv venv
+    if errorlevel 1 (
+        echo 创建虚拟环境失败
+        pause
+        exit /b 1
+    )
+)
+
+REM 激活虚拟环境
+call venv\Scripts\activate
+if errorlevel 1 (
+    echo 激活虚拟环境失败
+    pause
+    exit /b 1
+)
 
 REM 运行setup.py
 python setup.py
