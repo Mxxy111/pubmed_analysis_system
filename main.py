@@ -39,9 +39,12 @@ def ensure_results_dir(research_area):
     
     return result_dir
 
-def perform_literature_search():
+def perform_literature_search()::
     # 初始化PubMed爬虫
-    email = "your email address here"
+    # 从配置文件读取邮箱
+    with open('config.yaml', 'r', encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+    email = config['pubmed']['email']
     scraper = PubMedScraper(email)
 
     # 选择搜索方式
