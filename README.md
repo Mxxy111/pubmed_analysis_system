@@ -152,9 +152,9 @@ python main.py
 本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
 
 ## 联系方式 📧
-- **项目维护者**：[Mxxy111]
+- **项目维护者**：[https://github.com/Mxxy111] [https://github.com/Mac77777777777]
 - **GitHub**：[https://github.com/Mxxy111]
-- **问题反馈**：请在GitHub Issues中提交
+- **问题反馈**：请在GitHub Issues中提交：请在GitHub Issues中提交
 
 ## 更新日志 📅
 ### v1.0.0
