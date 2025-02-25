@@ -37,7 +37,7 @@
 
 1. **克隆项目到本地（已手动安装压缩包的跳过）**：
 ```bash
-git clone https://github.com/Mxxy111/pubmed-analysis-system.git
+git clone https://github.com/Mxxy111/pubmed_analysis_system.git
 cd pubmed-analysis-system
 ```
 
