@@ -7,7 +7,7 @@
 - PubMed文献自动检索和下载
   - 支持多关键词组合搜索
   - 自定义时间范围筛选
-  - 支持按影响因子、引用次数等指标筛选
+  - 支持按文章类型、语言指标筛选
 - 基于DeepSeek AI的文献智能解读
   - 自动提取文献关键信息
   - 多维度分析研究方法和结果
@@ -33,15 +33,15 @@
 - 至少4GB可用内存
 - 建议使用SSD存储
 
-## 安装步骤（已手动安装压缩包的跳到第3步安装依赖） 
+## 安装步骤
 
-1. 克隆项目到本地：
+1. 克隆项目到本地（已手动安装压缩包的跳过）：
 ```bash
 git clone https://github.com/Mxxy111/pubmed-analysis-system.git
 cd pubmed-analysis-system
 ```
 
-2. 创建并激活虚拟环境（推荐）：
+2. 创建并激活虚拟环境（推荐但可跳过）：
 ```bash
 python -m venv venv
 
@@ -57,9 +57,14 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## 配置说明
+## 配置说明（已添加setup.bat自动引导配置）
 
-1. 修改配置文件 `config.yaml`：
+1. 首次使用时，将`config.yaml.template`复制并重命名为`config.yaml`：
+- 系统提供了配置模板文件`config.yaml.template`
+- 首次运行时会自动将模板复制为 首次运行时会自动将模板复制为`config.yaml`
+- 也可以手动复制并重命名模板文件 也可以手动复制并重命名模板文件
+
+2. 修改配置文件 `config.yaml`：
 - 填写您的PubMed API访问邮箱
 - 配置api相关参数（具体端口地址、api_key和模型名称请根据需要查阅相关ai平台的api调用文档）
   - API密钥设置
