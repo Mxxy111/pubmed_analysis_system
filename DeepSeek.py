@@ -37,7 +37,11 @@ def get_mesh_query(research_area, broad_search=False, retry_count=0):
 
     # 初始化PubMed爬虫用于验证MeSH术语
     from pubmed_scraper import PubMedScraper
-    scraper = PubMedScraper("22301050067@m.fudan.edu.cn")
+    # 从配置文件读取邮箱
+    with open('config.yaml', 'r', encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+    email = config['pubmed']['email']
+    scraper = PubMedScraper(email)
     try:
         # 加载配置
         config = load_config()
