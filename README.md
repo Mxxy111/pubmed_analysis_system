@@ -38,7 +38,7 @@
 1. **克隆项目到本地（已手动安装压缩包的跳过）**：
 ```bash
 git clone https://github.com/Mxxy111/pubmed_analysis_system.git
-cd pubmed-analysis-system
+cd pubmed_analysis_system
 ```
 
 2. **创建并激活虚拟环境（推荐但可跳过）**：
