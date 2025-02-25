@@ -4,10 +4,10 @@ from literature_analysis import analyze_literature_from_csv
 import time
 import os
 import json
-import yaml
 import pandas as pd
 from advanced_analysis import AdvancedLiteratureAnalysis
 import re
+import yaml
 
 def preprocess_query(mesh_query):
     """预处理检索式
@@ -40,8 +40,7 @@ def ensure_results_dir(research_area):
     
     return result_dir
 
-def perform_literature_search():
-    # 初始化PubMed爬虫
+def main():
     # 从配置文件读取邮箱
     with open('config.yaml', 'r', encoding='utf-8') as f:
         config = yaml.safe_load(f)
@@ -146,7 +145,7 @@ def perform_literature_search():
         scraper.export_to_csv(articles, output_file, research_area)
         
         # 询问是否下载PDF
-        if input("\n是否需要尝试获取文献PDF全文？(y/n):（免责声明：很暴力，建议尽量先手动输入doi查找，尊重版权）（需校园网或开代理） ").lower() == 'y':
+        if input("\n是否需要尝试获取文献PDF全文？(y/n):（由于优雅性，建议尽量先手动输入doi查找）（需校园网或开代理） ").lower() == 'y':
             # 显示文献列表供用户选择
             print("\n已检索到的文献列表：")
             df = pd.read_csv(output_file)
