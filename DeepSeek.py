@@ -202,33 +202,90 @@ def validate_query_syntax(query):
     """校验查询式核心语法，返回错误列表"""
     errors = []
     
-    # 校验引号闭合
-    if query.count('"') % 2 != 0:
+    # 优化引号闭合检查逻辑
+    quote_positions = [i for i, char in enumerate(query) if char == '"']
+    if len(quote_positions) % 2 != 0:
         errors.append("检测到未闭合的引号")
+    else:
+        for i in range(0, len(quote_positions), 2):
+            if i + 1 < len(quote_positions):
+                start, end = quote_positions[i], quote_positions[i + 1]
+                term = query[start:end + 1]
+                # 检查引号内容是否为空或只包含空白字符
+                if not term.strip('"').strip():
+                    errors.append(f"引号内容不能为空: {term}")
+                # 检查引号内是否包含非法字符
+                if re.search(r'[\[\]]', term[1:-1]):
+                    errors.append(f"引号内不能包含字段标签: {term}")
+                # 检查引号后是否紧跟字段标签
+                after_quote = query[end + 1:].lstrip()
+                if not after_quote.startswith('['):
+                    errors.append(f"引号后应紧跟字段标签: {term}")
     
-    # 修正后的字段标签验证
-    field_tag_violations = re.findall(r'"([^"]+)"\[(MAJR|Mesh|PT)\]', query)
-    if not field_tag_violations:
-        errors.append("未找到有效的字段标签")
-    elif not all(tag in ['MAJR', 'Mesh', 'PT'] for _, tag in field_tag_violations):
-        errors.append("存在无效字段标签，允许的标签为 [MAJR]/[Mesh]/[PT]")
+    # 改进字段标签验证正则表达式
+    field_tag_pattern = r'"([^"]+)"\s*\[(MAJR|Mesh|PT)\]'
+    field_tag_matches = list(re.finditer(field_tag_pattern, query))
     
-    # 核心修正：匹配小写或混合大小写的布尔运算符
-    lower_ops = re.findall(r'\b(and|or|not)\b', query, flags=re.IGNORECASE)
-    # 过滤出实际包含小写字符的运算符
-    invalid_ops = [op for op in lower_ops if op != op.upper()]
-    if invalid_ops:
-        errors.append(f"布尔运算符必须全大写，但发现: {', '.join(invalid_ops)}")
+    if not field_tag_matches:
+        errors.append("未找到有效的字段标签，格式应为 \"Term\"[MAJR/Mesh/PT]")
+    
+    for match in field_tag_matches:
+        term, tag = match.groups()
+        # 检查字段标签格式
+        if tag not in ['MAJR', 'Mesh', 'PT']:
+            errors.append(f"无效的字段标签: [{tag}]")
+        # 检查术语格式
+        if not term.strip():
+            errors.append(f"字段标签前的术语不能为空")
+    
+    # 优化布尔运算符检查
+    operator_pattern = r'\b(AND|OR|NOT)\b'
+    found_operators = list(re.finditer(operator_pattern, query, re.IGNORECASE))
+    
+    if found_operators:
+        # 检查布尔运算符的使用
+        for i, match in enumerate(found_operators):
+            op = match.group()
+            if op != op.upper():
+                errors.append(f"布尔运算符必须全大写: {op} -> {op.upper()}")
+            
+            # 检查运算符前后的空格
+            start, end = match.span()
+            if start > 0 and query[start-1] != ' ':
+                errors.append(f"运算符 {op} 前缺少空格")
+            if end < len(query) and query[end] != ' ':
+                errors.append(f"运算符 {op} 后缺少空格")
+            
+            # 检查运算符前后是否有有效的搜索项
+            if i == 0 and start == 0:
+                errors.append(f"布尔运算符 {op} 不能出现在开头")
+            if i == len(found_operators) - 1 and end == len(query):
+                errors.append(f"布尔运算符 {op} 不能出现在结尾")
+            
+            # 检查相邻运算符
+            if i > 0:
+                prev_end = found_operators[i-1].end()
+                if start - prev_end <= 1:
+                    errors.append(f"布尔运算符之间必须有搜索项: {query[prev_end:start]}")
     
     return errors
 
 def normalize_operators(query):
     """确保运算符大写且被空格包裹"""
     # 先处理布尔运算符，确保大写并添加空格
-    query = re.sub(r'\s*(and|or|not)\s*', lambda m: f' {m.group(1).upper()} ', query, flags=re.IGNORECASE)
-    # 修复括号周围的空格
+    query = re.sub(r'\b(and|or|not)\b', lambda m: m.group(1).upper(), query, flags=re.IGNORECASE)
+    
+    # 确保运算符前后有空格
+    query = re.sub(r'\s*(AND|OR|NOT)\s*', r' \1 ', query)
+    
+    # 修复括号周围的空格，保持括号与内容之间的紧凑性
     query = re.sub(r'\s*\(\s*', ' (', query)
     query = re.sub(r'\s*\)\s*', ') ', query)
-    # 修复多余的空格
+    
+    # 修复字段标签周围的空格
+    query = re.sub(r'\s*\[([A-Za-z]+)\]\s*', r'[\1] ', query)
+    
+    # 修复多余的空格，包括开头和结尾
     query = re.sub(r'\s+', ' ', query).strip()
+    
     return query
