@@ -4,6 +4,7 @@ from literature_analysis import analyze_literature_from_csv
 import time
 import os
 import json
+import yaml
 import pandas as pd
 from advanced_analysis import AdvancedLiteratureAnalysis
 import re
