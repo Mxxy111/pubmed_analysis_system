@@ -169,7 +169,7 @@ python main.py
 - 问题报告
 - 新功能建议 新功能建议
 
-请参阅 请参阅 [CONTRIBUTING.md](CONTRIBUTING.md) 了解更多详情。 了解更多详情。
+请参阅 请参阅 [CONTRIBUTING.md](CONTRIBUTING.md) 了解更多详情。
 
 ---
 
