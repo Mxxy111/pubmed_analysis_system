@@ -479,8 +479,10 @@ class PubMedScraper(AggressivePDFDownloader):
             print("建议：\n1. 确保目标文件未被其他程序打开\n2. 检查文件夹的写入权限\n3. 尝试指定其他位置保存文件")
 
 def main():
-    # 设置您的邮箱
-    email = "22301050067@m.fudan.edu.cn" # 替换为您的邮箱
+    # 从配置文件读取邮箱
+    with open('config.yaml', 'r', encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+    email = config['pubmed']['email']
     scraper = PubMedScraper(email)
 
     # 设置搜索参数
