@@ -54,7 +54,8 @@ source venv/bin/activate
 
 3. **安装依赖包（Windows可直接运行setup.bat）**：
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt #官方
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple #清华镜像源（推荐）
 ```
 
 ## 配置说明 ⚙️（已添加setup.bat自动引导配置）
