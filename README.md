@@ -58,7 +58,7 @@ pip install -r requirements.txt #官方
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple #清华镜像源（推荐）
 ```
 
-## 配置说明 ⚙️（已添加setup.bat自动引导配置）
+## 配置说明 ⚙️
 
 1. **首次使用时，将`config.yaml.template`复制并重命名为`config.yaml`**：
 - 系统提供了配置模板文件`config.yaml.template`
@@ -67,8 +67,8 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple #清
 
 2. **修改配置文件 `config.yaml`**：
 - 填写您的PubMed API访问邮箱
-- 配置api相关参数（具体端口地址、api_key和模型名称请根据需要查阅相关ai平台的api调用文档）
-  - API密钥设置
+- 配置api相关参数（具体端口地址、api_key和模型名称请根据需要查阅相关ai平台的api调用文档） 配置api相关参数（具体端口地址、api_key和模型名称请根据需要查阅相关ai平台的api调用文档）
+  - API密钥设置 API密钥设置
   - 模型参数调整
   - 并发请求限制
   - 模型选择配置
@@ -161,7 +161,8 @@ python main.py
 - 初始版本发布
 - 支持基本的文献检索和分析功能
 - 集成DeepSeek AI进行文献解读
-- 实现多种格式的报告输出
+- 实现多种格式的报告输出 实现多种格式的报告输出
+- [] （setup.bat自动引导配置文件信息填入）
 
 ## 贡献指南 🤝
 我们欢迎所有形式的贡献，包括但不限于：
