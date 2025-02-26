@@ -175,8 +175,10 @@ python main.py
 - 文档完善
 - 问题报告
 - 新功能建议 新功能建议
+  ###感谢名单：
+  感谢[https://github.com/Mac77777777777]提供的优化及维护
 
-请参阅 请参阅 [CONTRIBUTING.md](CONTRIBUTING.md) 了解更多详情。
+请参阅[CONTRIBUTING.md](CONTRIBUTING.md) 了解更多详情。
 
 ---
 
