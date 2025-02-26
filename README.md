@@ -41,7 +41,7 @@ git clone https://github.com/Mxxy111/pubmed_analysis_system.git
 cd pubmed_analysis_system
 ```
 
-2. **创建并激活虚拟环境（推荐）（Windows可直接运行setup.bat完成该步及下一步）**：：
+2. **创建并激活虚拟环境（推荐）（Windows可直接运行setup.bat完成该步及下一步）**：
 ```bash
 python -m venv venv
 
@@ -52,7 +52,7 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-3. **安装依赖包**：：：：：：：：
+3. **安装依赖包**：
 ```bash
 pip install -r requirements.txt #官方
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple #清华镜像源（推荐）
