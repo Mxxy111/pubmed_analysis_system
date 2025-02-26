@@ -78,7 +78,7 @@ echo 正在检查requirements.txt中列出的所有模块是否已安装...
 python -c "import Bio, pandas, tqdm, requests, numpy, scipy, matplotlib, seaborn, networkx, nltk, wordcloud, yaml, dotenv, colorama, PyQt5, psutil, openpyxl" > nul 2>&1
 if errorlevel 1 (
     echo 检查失败：部分模块可能未安装，正在尝试自动安装...
-    pip install -r requirements.txt
+    pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
     REM 再次检查
     python -c "import Bio, pandas, tqdm, requests, numpy, scipy, matplotlib, seaborn, networkx, nltk, wordcloud, yaml, dotenv, colorama, PyQt5, psutil, openpyxl" > nul 2>&1
     if errorlevel 1 (
