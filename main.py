@@ -1,6 +1,6 @@
 from DeepSeek import get_mesh_query
 from pubmed_scraper import PubMedScraper
-from literature_analysis import analyze_literature_from_csv
+from literature_analysis import analyze_literature_from_csv, save_analysis_results, convert_analysis_format
 import time
 import os
 import json
@@ -191,7 +191,20 @@ def perform_literature_analysis(csv_file=None):
         return
     
     print("\n开始生成文献解读报告...")
-    analyze_literature_from_csv(csv_file)
+    analyses = analyze_literature_from_csv(csv_file)
+    if analyses:
+         # 保存分析结果
+         json_file = save_analysis_results(analyses, csv_file)
+         if json_file:
+              print(f"\nJSON格式的分析报告已保存至: {json_file}")
+              # 自动生成Markdown格式报告
+              md_file = convert_analysis_format(json_file, 'md')
+              if md_file:
+                   print(f"\nMarkdown格式的分析报告已保存至: {md_file}")
+         else:
+              print("\n保存分析结果失败")
+    else:
+         print("\n没有生成任何分析结果")
 
 def perform_literature_comparison(csv_file=None):
     if not csv_file:
