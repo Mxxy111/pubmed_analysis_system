@@ -39,6 +39,15 @@ if /I "%activateVenv%"=="n" (
     )
 )
 
+
+REM 检查Python是否安装
+python --version > nul 2>&1
+if errorlevel 1 (
+    echo 错误：未检测到Python，请安装Python 3.8或更高版本
+    pause    pause
+    exit /b 1
+)
+
 REM 运行 setup.py
 python setup.py
 if errorlevel 1 (
@@ -49,17 +58,6 @@ if errorlevel 1 (
 
 
 REM 在虚拟环境中检测必要的模块
-REM 检查Python是否安装
-python --version > nul 2>&1
-if errorlevel 1 (
-    echo 错误：未检测到Python，请安装Python 3.8或更高版本
-    pause
-    exit /b 1
-)
-
-
-
-
 REM 检查requirements.txt中列出的所有模块是否已安装
 echo 正在检查requirements.txt中列出的所有模块是否已安装...
 python -c "import Bio, pandas, tqdm, requests, numpy, scipy, matplotlib, seaborn, networkx, nltk, wordcloud, yaml, dotenv, colorama, PyQt5, psutil, openpyxl" > nul 2>&1
