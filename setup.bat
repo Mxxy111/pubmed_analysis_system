@@ -2,56 +2,6 @@
 chcp 65001 > nul
 echo 正在配置PubMed文献分析系统...
 
-REM 检查Python是否安装
-python --version > nul 2>&1
-if errorlevel 1 (
-    echo 错误：未检测到Python，请安装Python 3.8或更高版本
-    pause
-    exit /b 1
-)
-
-REM 检查是否安装requests模块
-python -c "import requests" > nul 2>&1
-if errorlevel 1 (
-    echo 未检测到requests模块，正在安装...
-    pip install requests
-    if errorlevel 1 (
-        echo 安装requests模块时出现错误，请检查网络连接或pip配置
-        pause
-        exit /b 1
-    )
-) else (
-    echo 检测到requests模块.
-)
-
-REM 检查是否安装yaml模块
-python -c "import yaml" > nul 2>&1
-if errorlevel 1 (
-    echo 未检测到yaml模块，正在安装...
-    pip install pyyaml
-    if errorlevel 1 (
-        echo 安装yaml模块时出现错误，请检查网络连接或pip配置
-        pause
-        exit /b 1
-    )
-) else (
-    echo 检测到yaml模块.
-)
-
-REM 检查是否安装Biopython模块
-python -c "from Bio import Entrez" > nul 2>&1
-if errorlevel 1 (
-    echo 未检测到Biopython模块，正在安装...
-    pip install biopython
-    if errorlevel 1 (
-        echo 安装Biopython模块时出现错误，请检查网络连接或pip配置
-        pause
-        exit /b 1
-    )
-) else (
-    echo 检测到Biopython模块.
-)
-
 REM ----------------------------
 REM 可选：创建虚拟环境
 set /p checkVenv=是否创建虚拟环境？ (Y/n): 
@@ -89,12 +39,57 @@ if /I "%activateVenv%"=="n" (
     )
 )
 
-REM 运行setup.py进行其他安装操作
-python setup.py
+REM 运行 set.up
+call set.up
 if errorlevel 1 (
-    echo 安装过程中出现错误，请查看上述错误信息
+    echo set.up 脚本运行出错.
     pause
     exit /b 1
+)
+
+
+REM 在虚拟环境中检测必要的模块
+REM 检查Python是否安装
+python --version > nul 2>&1
+if errorlevel 1 (
+    echo 错误：未检测到Python，请安装Python 3.8或更高版本
+    pause
+    exit /b 1
+)
+
+REM 检查是否安装requests模块
+python -c "import requests" > nul 2>&1
+if errorlevel 1 (
+    echo 未检测到requests模块，正在安装...
+    pip install requests
+    if errorlevel 1 (
+        echo 安装requests模块时出现错误，请检查网络连接或pip配置
+        pause
+        exit /b 1
+    )
+) else (
+    echo 检测到requests模块.
+)
+
+
+
+REM 检查requirements.txt中列出的所有模块是否已安装
+echo 正在检查requirements.txt中列出的所有模块是否已安装...
+python -c "import Bio, pandas, tqdm, requests, numpy, scipy, matplotlib, seaborn, networkx, nltk, wordcloud, yaml, dotenv, colorama, PyQt5, psutil, openpyxl" > nul 2>&1
+if errorlevel 1 (
+    echo 检查失败：部分模块可能未安装，正在尝试自动安装...
+    pip install -r requirements.txt
+    REM 再次检查
+    python -c "import Bio, pandas, tqdm, requests, numpy, scipy, matplotlib, seaborn, networkx, nltk, wordcloud, yaml, dotenv, colorama, PyQt5, psutil, openpyxl" > nul 2>&1
+    if errorlevel 1 (
+        echo 自动安装后仍有模块未安装，请手动检查配置.
+        pause
+        exit /b 1
+    ) else (
+        echo 自动安装后所有 requirements.txt 中的模块均已安装.
+    )
+) else (
+    echo 所有 requirements.txt 中的模块均已安装.
 )
 
 echo 安装完成！
