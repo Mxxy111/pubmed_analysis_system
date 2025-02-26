@@ -40,7 +40,7 @@ def ensure_results_dir(research_area):
     
     return result_dir
 
-def perform_literature_search()::
+def perform_literature_search():
     # 从配置文件读取邮箱
     with open('config.yaml', 'r', encoding='utf-8') as f:
         config = yaml.safe_load(f)
