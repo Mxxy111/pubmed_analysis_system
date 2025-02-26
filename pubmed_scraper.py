@@ -278,27 +278,29 @@ class PubMedScraper(AggressivePDFDownloader):
             list: 文献信息字典列表
         """
         articles = []
-        try:
-            for pmid in tqdm(id_list, desc="获取文献信息"):
+        for pmid in tqdm(id_list, desc="获取文献信息"):
+            try:
                 handle = Entrez.efetch(db="pubmed", id=pmid, rettype="xml", retmode="text")
                 record = Entrez.read(handle)["PubmedArticle"][0]["MedlineCitation"]
                 handle.close()
-
-                # 提取文献信息
+    
                 article = {'pmid': pmid}
-                
                 # 获取标题
-                article['title'] = str(record['Article']['ArticleTitle']) if 'ArticleTitle' in record['Article'] else ''
-                
+                article['title'] = str(record['Article'].get('ArticleTitle', ''))
+    
                 # 获取摘要和结论
                 if 'Abstract' in record['Article'] and 'AbstractText' in record['Article']['Abstract']:
                     abstract_text = record['Article']['Abstract']['AbstractText']
                     if isinstance(abstract_text, list):
-                        # 尝试从结构化摘要中提取结论
                         article['abstract'] = str(abstract_text[0])
                         article['conclusion'] = ''
                         for section in abstract_text:
-                            if hasattr(section, 'attributes') and 'Label' in section.attributes:
+                            # 针对可能为字典的情况进行判断
+                            if isinstance(section, dict) and section.get('Label', '').lower() in ['conclusion', 'conclusions']:
+                                article['conclusion'] = str(section.get('#text', ''))
+                                break
+                            # 如果是对象，则用 hasattr 判断
+                            elif hasattr(section, 'attributes') and 'Label' in section.attributes:
                                 if section.attributes['Label'].lower() in ['conclusion', 'conclusions']:
                                     article['conclusion'] = str(section)
                                     break
@@ -308,66 +310,58 @@ class PubMedScraper(AggressivePDFDownloader):
                 else:
                     article['abstract'] = ''
                     article['conclusion'] = ''
-                
+    
                 # 获取作者
                 if 'AuthorList' in record['Article']:
                     authors = []
                     for author in record['Article']['AuthorList']:
-                        last_name = str(author['LastName']) if 'LastName' in author else ''
-                        fore_name = str(author['ForeName']) if 'ForeName' in author else ''
+                        last_name = str(author.get('LastName', ''))
+                        fore_name = str(author.get('ForeName', ''))
                         authors.append(f"{last_name} {fore_name}".strip())
                     article['authors'] = '; '.join(authors)
                 else:
                     article['authors'] = ''
-                
+    
                 # 获取期刊名
-                if 'Journal' in record['Article'] and 'Title' in record['Article']['Journal']:
-                    article['journal'] = str(record['Article']['Journal']['Title'])
-                else:
-                    article['journal'] = ''
-                
+                article['journal'] = str(record['Article'].get('Journal', {}).get('Title', ''))
+    
                 # 获取出版日期（年月）
-                if 'Journal' in record['Article'] and 'JournalIssue' in record['Article']['Journal'] \
-                   and 'PubDate' in record['Article']['Journal']['JournalIssue']:
+                if 'Journal' in record['Article'] and 'JournalIssue' in record['Article']['Journal'] and \
+                   'PubDate' in record['Article']['Journal']['JournalIssue']:
                     pub_date = record['Article']['Journal']['JournalIssue']['PubDate']
                     year = str(pub_date.get('Year', ''))
                     month = str(pub_date.get('Month', ''))
                     if year:
                         if month:
                             try:
-                                # 尝试将月份转换为数字格式
                                 if month.isdigit():
                                     month_num = int(month)
                                 else:
-                                    month_num = datetime.strptime(month, '%b').month
+                                    try:
+                                        # 先尝试缩写格式
+                                        month_num = datetime.strptime(month, '%b').month
+                                    except ValueError:
+                                        month_num = datetime.strptime(month, '%B').month
                                 article['publication_date'] = f"{year}/{month_num:02d}"
                             except ValueError:
-                                # 如果转换失败，尝试其他日期格式
-                                try:
-                                    parsed_date = datetime.strptime(f"{year} {month}", '%Y %B')
-                                    article['publication_date'] = parsed_date.strftime('%Y/%m')
-                                except ValueError:
-                                    article['publication_date'] = f"{year}"
+                                article['publication_date'] = f"{year}"
                         else:
                             article['publication_date'] = f"{year}"
                     else:
                         article['publication_date'] = ''
                 else:
                     article['publication_date'] = ''
-                
+    
                 # 获取文章类型
                 if 'PublicationTypeList' in record['Article']:
                     pub_types = [str(pt) for pt in record['Article']['PublicationTypeList']]
                     article['article_type'] = '; '.join(pub_types)
                 else:
                     article['article_type'] = ''
-                
+    
                 # 获取期刊影响因子（IF）
                 try:
                     if article['journal']:
-                        # 使用期刊名称从Journal Citation Reports API获取IF
-                        # 注意：这里需要替换为实际的JCR API调用
-                        # 由于JCR API需要订阅，这里使用一个示例字典来模拟
                         journal_if_map = {
                             'Nature': '49.962',
                             'Science': '47.728',
@@ -376,28 +370,50 @@ class PubMedScraper(AggressivePDFDownloader):
                             'The New England Journal of Medicine': '91.245'
                         }
                         article['impact_factor'] = journal_if_map.get(article['journal'], '')
+                    else:
+                        article['impact_factor'] = ''
                 except Exception as e:
                     print(f"获取影响因子出错: {str(e)}")
                     article['impact_factor'] = ''
-                
+    
                 # 获取DOI
                 article['doi'] = ''
                 if 'ELocationID' in record['Article']:
-                    for id_info in record['Article']['ELocationID']:
-                        if id_info.attributes['EIdType'] == 'doi':
-                            article['doi'] = str(id_info)
-                            break
-                
+                    # ELocationID 可能为字典或列表
+                    elocation = record['Article']['ELocationID']
+                    if not isinstance(elocation, list):
+                        elocation = [elocation]
+                    for id_info in elocation:
+                        # 针对字典格式处理
+                        if isinstance(id_info, dict):
+                            if id_info.get('@EIdType') == 'doi':
+                                article['doi'] = id_info.get('#text', '')
+                                break
+                        # 如果是对象（例如Biopython内部的对象），则用 attributes 判断
+                        elif hasattr(id_info, 'attributes') and 'EIdType' in id_info.attributes:
+                            if id_info.attributes['EIdType'] == 'doi':
+                                article['doi'] = str(id_info)
+                                break
+    
                 # 获取MeSH主题词
                 if 'MeshHeadingList' in record:
-                    mesh_terms = [str(mesh['DescriptorName']) for mesh in record['MeshHeadingList']]
+                    mesh_terms = []
+                    for mesh in record['MeshHeadingList']:
+                        # 针对字典格式
+                        if isinstance(mesh, dict):
+                            mesh_terms.append(str(mesh.get('DescriptorName', '')))
+                        else:
+                            mesh_terms.append(str(mesh))
                     article['keywords'] = '; '.join(mesh_terms)
                 else:
                     article['keywords'] = ''
+    
                 articles.append(article)
                 time.sleep(0.5)  # 避免请求过于频繁
-        except Exception as e:
-            print(f"获取详细信息出错: {str(e)}")
+            except Exception as e:
+                print(f"处理PMID {pmid}时出错: {str(e)}")
+                # 可以选择记录错误或继续处理下一篇
+                continue
         return articles
 
     def export_to_csv(self, articles, output_file, query):
