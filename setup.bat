@@ -57,19 +57,6 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM 检查是否安装requests模块
-python -c "import requests" > nul 2>&1
-if errorlevel 1 (
-    echo 未检测到requests模块，正在安装...
-    pip install requests
-    if errorlevel 1 (
-        echo 安装requests模块时出现错误，请检查网络连接或pip配置
-        pause
-        exit /b 1
-    )
-) else (
-    echo 检测到requests模块.
-)
 
 
 
