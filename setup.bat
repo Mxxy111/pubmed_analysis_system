@@ -4,7 +4,7 @@ echo 正在配置PubMed文献分析系统...
 
 REM ----------------------------
 REM 可选：创建虚拟环境
-set /p checkVenv=是否创建虚拟环境？ (Y/n): 
+set /p checkVenv=是否创建虚拟环境？ (Y/N): 
 if /I "%checkVenv%"=="n" (
     echo 跳过虚拟环境创建.
 ) else (
@@ -23,7 +23,7 @@ if /I "%checkVenv%"=="n" (
 
 REM ----------------------------
 REM 可选：激活虚拟环境
-set /p activateVenv=是否激活虚拟环境？ (Y/n): 
+set /p activateVenv=是否激活虚拟环境？ (Y/N): 
 if /I "%activateVenv%"=="n" (
     echo 跳过激活虚拟环境.
 ) else (
@@ -39,8 +39,8 @@ if /I "%activateVenv%"=="n" (
     )
 )
 
-REM 运行 set.up
-call set.up
+REM 运行 setup.py
+python setup.py
 if errorlevel 1 (
     echo set.up 脚本运行出错.
     pause
@@ -92,5 +92,5 @@ if errorlevel 1 (
     echo 所有 requirements.txt 中的模块均已安装.
 )
 
-echo 安装完成！
+echo 安装完成！开始使用吧~
 pause
