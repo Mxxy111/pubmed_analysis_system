@@ -24,7 +24,7 @@ if errorlevel 1 (
     echo 检测到requests模块.
 )
 
-REM 检测yaml是否安装
+REM 检查是否安装yaml模块
 python -c "import yaml" > nul 2>&1
 if errorlevel 1 (
     echo 未检测到yaml模块，正在安装...
@@ -38,7 +38,19 @@ if errorlevel 1 (
     echo 检测到yaml模块.
 )
 
-
+REM 检查是否安装Biopython模块
+python -c "from Bio import Entrez" > nul 2>&1
+if errorlevel 1 (
+    echo 未检测到Biopython模块，正在安装...
+    pip install biopython
+    if errorlevel 1 (
+        echo 安装Biopython模块时出现错误，请检查网络连接或pip配置
+        pause
+        exit /b 1
+    )
+) else (
+    echo 检测到Biopython模块.
+)
 
 REM ----------------------------
 REM 可选：创建虚拟环境
