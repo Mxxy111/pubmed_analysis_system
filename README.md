@@ -40,6 +40,7 @@
 git clone https://github.com/Mxxy111/pubmed_analysis_system.git
 cd pubmed_analysis_system
 ```
+⚠️若通过压缩包形式下载，请先更改文件名为'pubmed_analysis_system'
 
 2. **创建并激活虚拟环境（推荐）（Windows可直接运行setup.bat完成该步及下一步）**：
 ```bash
