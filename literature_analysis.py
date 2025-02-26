@@ -5,15 +5,17 @@ import os
 import yaml
 from typing import Dict, List
 from datetime import datetime
+import time
 
-def generate_literature_analysis(literature_info: Dict) -> str:
+def generate_literature_analysis(literature_info: Dict, retries: int = 3) -> str:
     """使用DeepSeek AI生成文献解读报告
 
     Args:
         literature_info (Dict): 包含文献信息的字典
+        retries (int): 尝试重试次数
 
     Returns:
-        str: 生成的文献解读报告
+        str: 生成的文献解读报告，如果超过重试限制则返回None
     """
     try:
         # 读取配置文件
@@ -72,14 +74,28 @@ def generate_literature_analysis(literature_info: Dict) -> str:
             "Content-Type": "application/json"
         }
 
-        response = requests.post(url, json=payload, headers=headers)
-        response.raise_for_status()  # 抛出HTTP错误以便更好地处理
-        
-        response_data = response.json()
-        if 'choices' in response_data and len(response_data['choices']) > 0:
-            return response_data['choices'][0]['message']['content'].strip()
-        else:
-            raise ValueError("API响应中未找到有效的分析结果")
+        attempt = 0
+        while attempt < retries:
+            try:
+                response = requests.post(url, json=payload, headers=headers)
+                response.raise_for_status()  # 抛出HTTP错误以便更好地处理
+                
+                response_data = response.json()
+                if 'choices' in response_data and len(response_data['choices']) > 0:
+                    result = response_data['choices'][0]['message']['content'].strip()
+                    if result:
+                        return result
+                    else:
+                        raise ValueError("生成的分析报告为空")
+                else:
+                    raise ValueError("API响应中未找到有效的分析结果")
+            except Exception as e:
+                attempt += 1
+                print(f"尝试 {attempt} 次生成解读报告失败: {e}")
+                time.sleep(2)  # 等待2秒后重试
+            
+        print("达到最大重试次数，生成解读报告失败。")
+        return None
             
     except requests.exceptions.RequestException as e:
         print(f"API请求错误: {str(e)}")
@@ -196,22 +212,23 @@ def save_analysis_results(analyses: List[Dict], csv_file: str) -> str:
     try:
         if not analyses:
             raise ValueError("没有可保存的分析结果")
-            
-        # 生成输出文件路径
+
+        # 生成输出文件路径，使用CSV文件所在目录下的analysis_results子目录
         csv_dir = os.path.dirname(csv_file)
+        analysis_dir = os.path.join(csv_dir, "analysis_results")
+        os.makedirs(analysis_dir, exist_ok=True)
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_filename = f"{os.path.splitext(os.path.basename(csv_file))[0]}_analysis_{timestamp}.json"
-        output_file = os.path.join(csv_dir, output_filename)
-        
-        # 确保输出目录存在
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)
-        
+        output_file = os.path.join(analysis_dir, output_filename)
+
         # 保存分析结果
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(analyses, f, ensure_ascii=False, indent=2)
-            
+
+        print(f"分析结果成功保存至: {output_file}")
         return output_file
-        
+
     except Exception as e:
         print(f"保存分析结果时发生错误: {str(e)}")
         return None
@@ -316,7 +333,7 @@ if __name__ == "__main__":
         if json_file:
             print(f"\nJSON格式的分析报告已保存至: {json_file}")
             
-            # 自动生成MD格式报告
+            # 自动生成Markdown格式报告
             md_file = convert_analysis_format(json_file, 'md')
             if md_file:
                 print(f"\nMarkdown格式的分析报告已保存至: {md_file}")
@@ -336,19 +353,3 @@ if __name__ == "__main__":
             print("\n保存分析结果失败")
     else:
         print("\n没有生成任何分析结果")
-    # 获取CSV文件所在的子文件夹路径
-    import os
-    csv_dir = os.path.dirname(csv_file)
-    
-    # 生成输出文件路径，保持在同一个子文件夹中
-    output_filename = os.path.basename(csv_file).replace('.csv', '_analysis.json')
-    output_file = os.path.join(csv_dir, output_filename)
-    
-    # 确保输出目录存在
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
-    
-    # 将分析结果保存为JSON文件
-    with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(analyses, f, ensure_ascii=False, indent=2)
-    
-    print(f"文献解读报告已保存至: {output_file}")
