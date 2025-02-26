@@ -60,16 +60,11 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple #清
 
 ## 配置说明 ⚙️
 
-1. **首次使用时，将`config.yaml.template`复制并重命名为`config.yaml`**：
-- 系统提供了配置模板文件`config.yaml.template`
-- 首次运行时会自动将模板复制为 首次运行时会自动将模板复制为`config.yaml`
-- 也可以手动复制并重命名模板文件 也可以手动复制并重命名模板文件
-
-2. **修改配置文件 `config.yaml`**：
+1. **修改配置文件 `config.yaml`**：
 - 填写您的PubMed API访问邮箱
 - 配置api相关参数（具体端口地址、api_key和模型名称请根据需要查阅相关ai平台的api调用文档） 配置api相关参数（具体端口地址、api_key和模型名称请根据需要查阅相关ai平台的api调用文档）
   - API密钥设置 API密钥设置
-  - 模型参数调整
+  - 模型参数调整 模型参数调整
   - 并发请求限制
   - 模型选择配置
     - active_model：设置literature_analysis.py和advanced_analysis.py使用的默认模型
@@ -77,7 +72,12 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple #清
 - 根据需要调整文献筛选和分析参数
   - 搜索范围设置
   - 过滤条件定义
-  - 输出格式配置
+  - 输出格式配置 输出格式配置
+ 
+
+2. **系统提供了配置模板文件`config.yaml.template`**：：
+- 若没有'config.yaml'，手动复制模板文件并重命名为'config.yaml'后再修改配置。
+
 
 ## 使用说明 📖
 
