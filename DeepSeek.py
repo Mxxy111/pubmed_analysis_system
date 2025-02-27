@@ -110,8 +110,9 @@ def get_mesh_query(research_area, broad_search=False, retry_count=0):
                 content = response_data['choices'][0]['message']['content'].strip()
                 if content:
                     print(f"API响应内容：{content}")
-                    # 移除外层引号并修复引号问题
-                    content = content.strip('"')
+                    # 仅在返回内容同时以双引号开头和结尾时才移除外层引号
+                    if content.startswith('"') and content.endswith('"'):
+                        content = content[1:-1]
                     # 应用后处理逻辑
                     content = fix_quotes_closing(content)
                     content = validate_field_tags(content)
