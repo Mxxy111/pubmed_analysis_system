@@ -50,13 +50,12 @@ def get_mesh_query(research_area, broad_search=False, retry_count=0):
             return None
 
         # 获取MeSH查询专用的API配置
-        mesh_query_model = config['api']['mesh_query_model']
-        api_config = config['api'][mesh_query_model]
+        api_config = config['mesh_query_model']
+        url = api_config['endpoint']
         
         # 根据搜索策略调整系统提示
         strategy_desc = "使用更宽泛策略，包含相关MeSH术语" if broad_search else "使用精确策略，侧重[Majr]标签"
         print(f"\n当前使用的搜索策略: {strategy_desc}")
-
         system_prompt = """你是一个专业的PubMed检索专家。请将输入的研究领域直接转换为标准的MeSH检索式。只需要输出检索式本身，不要包含任何解释、标记或其他内容。请严格按照以下规则处理：
 
 1. **语法格式**：
@@ -69,7 +68,10 @@ def get_mesh_query(research_area, broad_search=False, retry_count=0):
    - 宽泛策略：优先使用[Mesh]标签
 
 3. **排除规则**：自动追加非研究文献过滤
-   - 必须包含：NOT (\"Case Reports\"[PT] OR \"Comment\"[PT] OR \"Editorial\"[PT])
+   - 必须包含以下研究类型之一：
+     AND (\"Clinical Trial\"[PT] OR \"Observational Study\"[PT] OR \"Meta-Analysis\"[PT] OR \"Systematic Review\"[PT] OR \"Randomized Controlled Trial\"[PT] OR \"Multicenter Study\"[PT] OR \"Comparative Study\"[PT] OR \"Controlled Clinical Trial\"[PT] OR \"Validation Study\"[PT])
+   - 必须排除以下非研究性文献：
+     NOT (\"Case Reports\"[PT] OR \"Comment\"[PT] OR \"Editorial\"[PT] OR \"Letter\"[PT] OR \"News\"[PT] OR \"Newspaper Article\"[PT] OR \"Historical Article\"[PT] OR \"Published Erratum\"[PT] OR \"Retracted Publication\"[PT] OR \"Retraction of Publication\"[PT] OR \"Practice Guideline\"[PT])
 
 4. **校验功能**：生成时会自动执行以下验证：
    - 每个\"[字段]前必有闭合引号 \"
@@ -85,7 +87,7 @@ def get_mesh_query(research_area, broad_search=False, retry_count=0):
                 },
                 {
                     "role": "user",
-                    "content": f"请为【{research_area}】生成PubMed检索式，要求：\n{strategy_desc}\n排除病例报告等非研究文献：NOT (\"Case Reports\"[Publication Type])"
+                    "content": f"请为【{research_area}】生成PubMed检索式，要求：\n{strategy_desc}\n必须包含以下研究类型之一：\n(\"Clinical Trial\"[PT] OR \"Observational Study\"[PT] OR \"Meta-Analysis\"[PT] OR \"Systematic Review\"[PT] OR \"Randomized Controlled Trial\"[PT] OR \"Multicenter Study\"[PT] OR \"Comparative Study\"[PT] OR \"Controlled Clinical Trial\"[PT] OR \"Validation Study\"[PT])\n\n必须排除以下非研究性文献：\nNOT (\"Case Reports\"[PT] OR \"Comment\"[PT] OR \"Editorial\"[PT] OR \"Letter\"[PT] OR \"News\"[PT] OR \"Newspaper Article\"[PT] OR \"Historical Article\"[PT] OR \"Published Erratum\"[PT] OR \"Retracted Publication\"[PT] OR \"Retraction of Publication\"[PT] OR \"Practice Guideline\"[PT])"
                 }
             ],
             "stream": False,
