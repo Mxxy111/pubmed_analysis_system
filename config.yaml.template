@@ -1,38 +1,79 @@
 # 文献分析系统配置文件
 
+#用户名
+username: "username"
+
 # API设置
 api:
-  deepseek: # DeepSeek官网
-    endpoint: "https://api.deepseek.com/chat/completions" #api端点
-    api_key: "your_api_key_here" #api密钥
-    model: "deepseek-chat" # 模型名称
-    max_tokens: 4096 4096 # 最大token数
-    temperature: 0.7 #0~1.5，越大生成内容自由度越大
-    top_p: 0.7
-  volces: # 火山引擎
-    endpoint: "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
+  DeepSeek:
+    endpoint: "https://api.deepseek.com/v1"
     api_key: "your_api_key_here"
-    model: "ep—xxx"
-    max_tokens: 8186
-    temperature: 0.7
-    top_p: 0.7
-  gpt: #OpenAI
-    endpoint: "https://api.openai.com/v1"
-    api_key: "your_api_key_here"
-    model: "gpt-4"
+    models:
+      model_1: deepseek-reasoner
+      model_2: deepseek-chat
+      model_3: "No_default_model"
+      model_4: "No_default_model"
+      model_5: "No_default_model"
     max_tokens: 4096
     temperature: 0.7
     top_p: 0.7
-  mesh_query: #mesh检索式生成专用API，可以根据需要自行添加
+  Volces:
     endpoint: "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
     api_key: "your_api_key_here"
-    model: "model ID"
-    max_tokens: 2048
-    temperature: 0.3
-    top_p: 0.9
+    models: 
+      model_1: "No_default_model"
+      model_2: "No_default_model"
+      model_3: "No_default_model"
+      model_4: "No_default_model"
+      model_5: "No_default_model"
+    max_tokens: 8186
+    temperature: 0.7
+    top_p: 0.7
+  ChatGPT:
+    endpoint: "https://api.openai.com/v1"
+    api_key: "your_api_key_here"
+    models:
+      model_1: "gpt-4"
+      model_2: "No_default_model"
+      model_3: "No_default_model"
+      model_4: "No_default_model"
+      model_5: "No_default_model"
+    max_tokens: 4096
+    temperature: 0.7
+    top_p: 0.7
   # 可以添加其他模型的配置
-  active_model: "volces"  # literature_analysis.py和advanced_analysis.py使用的默认模型
-  mesh_query_model: "mesh_query"  # DeepSeek.py专用的API配置
+  自定义:
+    endpoint: "https://default_endpoint.com"
+    api_key: "your_api_key_here"
+    models:
+      model_1: "No_default_model"
+      model_2: "No_default_model"
+      model_3: "No_default_model"
+      model_4: "No_default_model"
+      model_5: "No_default_model"
+    max_tokens: 2048
+    temperature: 0.7
+    top_p: 0.7
+
+# literature_analysis.py和advanced_analysis.py使用的默认模型
+active_model:   
+  provider: "your_provider"
+  endpoint: "https://default_endpoint.com"
+  api_key: "your_api_key_here"
+  model: "No_default_model"
+  max_tokens: 2048
+  temperature: 0.7
+  top_p: 0.7
+
+# mesh_query使用的默认模型
+mesh_query_model:   
+  provider: "your_provider"
+  endpoint: "https://default_endpoint.com"
+  api_key: "your_api_key_here"
+  model: "No_default_model"
+  max_tokens: 2048
+  temperature: 0.7
+  top_p: 0.7
 
 # PubMed设置
 pubmed:
@@ -77,11 +118,21 @@ analysis:
     - discussion
     - conclusion
   
+  comparison_metrics:  # 文献对比维度
+    - research_design
+    - sample_size
+    - key_findings
+    - limitations
+  
   output_formats:  # 输出格式选项
     - json
     - markdown
     - txt
     - csv
+  
+  language:     # 输出语言：zh/en
+    - zh
+    - en  
 
 # 系统设置
 system:
@@ -91,3 +142,19 @@ system:
   cache_enabled: true  # 是否启用缓存
   cache_dir: "./cache"  # 缓存目录
   log_level: INFO  # 日志级别：DEBUG/INFO/WARNING/ERROR
+
+# 自动更新设置
+auto_update:
+  enabled: true
+  frequency: weekly  # 更新频率：daily/weekly/monthly
+  notification:  # 更新通知方式
+    email: true
+    report: true
+  update_threshold: 5  # 最小更新文献数量阈值
+
+# 输出设置
+output:
+  format: markdown  # 输出格式：markdown/pdf/html
+  save_path: ./results/  # 结果保存路径
+  file_naming: "{research_area}_{date}"  # 文件命名格式
+  include_metadata: true  # 是否包含元数据
