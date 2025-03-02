@@ -23,7 +23,7 @@ def generate_literature_analysis(literature_info: Dict, retries: int = 3) -> str
             config = yaml.safe_load(f)
         
         # 获取API配置
-        api_config = config['api']['volces']
+        api_config = config['active_model']
         url = api_config['endpoint']
 
         prompt = f"""请对以下医学文献进行专业的解读分析，生成一份详细的报告。
