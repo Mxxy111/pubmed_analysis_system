@@ -147,7 +147,7 @@ class AdvancedLiteratureAnalysis:
                 config = yaml.safe_load(f)
             
             # 获取API配置
-            api_config = config['api']['volces']
+            api_config = config['active_model']
             url = api_config['endpoint']
             
             # 构建文献对比提示词
