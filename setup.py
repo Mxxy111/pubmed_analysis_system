@@ -48,10 +48,10 @@ def setup_logging():
     logger.addHandler(console_handler)
 
     # 测试日志输出
-    logger.info("日志配置完成，开始记录日志")
+    logger.info("\n===日志配置完成，开始记录日志📝===\n")
 
 def load_version_map(file_path=SCRIPT_DIR /"version_map.json"):
-    #加载版本映射文件
+    '''加载版本映射文件'''
     try:
         with open(file_path, "r") as file:
             # 将 JSON 文件内容解析为 Python 字典
@@ -62,8 +62,8 @@ def load_version_map(file_path=SCRIPT_DIR /"version_map.json"):
         version_map = {tuple(map(int, key.strip('()').split(','))): value for key, value in version_map.items()}
         return version_map
     except Exception as e:
-        logger.error(f"加载版本映射文件失败: {e}")
-        raise RuntimeError("版本映射文件加载失败")
+        logger.error(f"✗... 加载版本映射文件失败: {e}")
+        raise RuntimeError("✗... 版本映射文件加载失败")
 
 def load_mirrors_from_json(mirrors_file =SCRIPT_DIR /'mirrors.json'):
     """加载镜像源列表从 JSON 文件"""
@@ -72,7 +72,7 @@ def load_mirrors_from_json(mirrors_file =SCRIPT_DIR /'mirrors.json'):
             data = json.load(file)
             return data.get('mirrors', [])
     except Exception as e:
-        logger.error(f"加载镜像源文件失败: {e}")
+        logger.error(f"✗... 加载镜像源文件失败: {e}")
         sys.exit(1)
 
 def check_project_directory():
@@ -285,47 +285,11 @@ def choose_model(available_models, prompt):
             else:
                 break
         except ValueError:
-            logger.error(f"无效输入...请输入有效数字({attempts+1}/4)")
+            logger.error(f"✗... 无效输入，请输入有效数字({attempts+1}/4)")
             attempts += 1
     else:
         return None , None
     return model_choices[choice][0] ,model_choices[choice][1]  # 返回模型名称
- 
-def add_custom_api(config_data):
-    # 提示用户输入新 API 的配置
-    print("请按照提示输入新的 API 配置: ")
-    api_name = '自定义'
-    default_endpoint = config_data['api']["自定义"]['endpoint']
-    default_api_key = config_data['api']["自定义"]['api_key']
-    default_models = config_data['api']["自定义"]['models']
-    default_max_tokens = config_data['api'][api_name]['max_tokens']
-    default_temperature = config_data['api'][api_name]['temperature']
-    default_top_p = config_data['api'][api_name]['top_p']
-    try:
-        config_data['api'][api_name]['endpoint'] = input_endpoint(api_name,config_data)
-        if config_data['api'][api_name]['endpoint'] == default_endpoint:
-            raise ValueError
-        config_data['api'][api_name]['models'] , flag = input_model(api_name,config_data)
-        if not flag:
-            raise ValueError
-        config_data['api'][api_name]['api_key'] = input_api_key(api_name)
-        if config_data['api'][api_name]['api_key'] == default_api_key:
-            raise ValueError
-        config_data['api'][api_name]['max_tokens'] = input_max_tokens(api_name,config_data)
-        if not config_data['api'][api_name]['max_tokens']:
-            config_data['api'][api_name]['max_tokens'] = default_max_tokens
-            raise ValueError
-        config_data['api'][api_name]['temperature'] = input_temperature(api_name,config_data)
-        if not config_data['api'][api_name]['temperature']:
-            config_data['api'][api_name]['temperature'] = default_temperature
-            raise ValueError
-        config_data['api'][api_name]['top_p'] = input_top_p(api_name,config_data)
-        if not config_data['api'][api_name]['top_p']:
-            config_data['api'][api_name]['top_p'] = default_top_p
-            raise ValueError
-        return config_data , True
-    except ValueError:
-        return config_data , False
 
 def extract_keys(template):
     """递归提取模板的所有字段（键），忽略值。"""
@@ -417,7 +381,7 @@ def sync_yaml_with_template(template_file, existing_file):
     # **仅输出真正修改的字段**
     if retained_values not in [None, {}, []]:
         print(yaml.dump(retained_values, allow_unicode=True, default_flow_style=False))
-        print("\n📌 以上是原 YAML 中用户除active_model与mesh_query_model外修改的部分（注意:模版预设值如默认的Endpoint和model ID不会显示！！） ")
+        print("\n📌⚠️ 以上是原 YAML 中用户除active_model与mesh_query_model外修改的部分（注意:模版预设值如默认的Endpoint和model ID不会显示！！） ")
     else:
         print("\n✓...YAML 文件同步完成，未检测到用户修改的数据。")
 
@@ -438,6 +402,12 @@ def check_application_model_info(model_data,template_data):
 
 def setup_config():
     """设置配置文件"""
+    logger.info("\n=== 配置文件设置向导 ===")  # 📝 添加步骤标题
+    print("我们将引导您完成以下配置步骤(已经配置过的部分会跳过)：")
+    print("1. 选择配置模式")
+    print("2. 填写基本信息")
+    print("3. 配置API参数\n")
+
     config_template = Path("config.yaml.template")
     config_file = Path("config.yaml")
 
@@ -522,7 +492,7 @@ def setup_config():
                         save_yaml(config_file,config_data)
 
                 if not active_model_flag:
-                    print(f"\n您选择的 active_model 配置信息:\n")
+                    print(f"⚠️ 您选择的 active_model 配置信息:\n")
                     print(yaml.dump(config_data['active_model'], allow_unicode=True, default_flow_style=False))
                     if input("回车Enter以继续，若要修改请输入其他任意字符:").strip():
                         config_data['active_model'] = template_data['active_model']
@@ -532,7 +502,7 @@ def setup_config():
                     else:
                         active_model_flag = False
 
-                print(f"您选择的 mesh_query_model 配置信息:\n ")
+                print(f"⚠️ 您选择的 mesh_query_model 配置信息:\n ")
                 print(yaml.dump(config_data['mesh_query_model'], allow_unicode=True, default_flow_style=False))
                 user_input = input("回车Enter以继续，若要修改请输入其他任意字符,输入b返回上一步(选择active modoel):")
 
@@ -570,7 +540,7 @@ def setup_config():
         elif user_choice == '5':
             return False
         else:
-            logger.error(f'无效输入，请输入正确数字({attempts+1}/4)')       
+            logger.error(f'✗... 无效输入，请输入正确数字({attempts+1}/4)')       
             attempts += 1
     else:
         logger.error("✗... 超过最大重试次数")
@@ -811,13 +781,13 @@ def update_yaml_interactively(data, template, config_data,template_data,path=Non
                 elif isinstance(template,float):
                     new_value = float(new_value)
             except ValueError:
-                logger.error(f"无效输入...请输入格式一致的有效信息{attempts+1}/4")
+                logger.error(f"✗... 无效输入，请输入格式一致的有效信息{attempts+1}/4")
                 attempts += 1
                 continue
             if new_value:
                 if model:
                     if new_value == "No_default_model":
-                        logger.error(f"无效输入...请输入有效信息{attempts+1}/4")
+                        logger.error(f"✗... 无效输入，请输入有效信息{attempts+1}/4")
                         attempts += 1
                         continue
                     elif new_value in config_data["api"][model]["models"].values():
@@ -843,8 +813,12 @@ def edit_config(config_template, config_file, edit_new_config = False, simple_mo
         logger.info(f"✓... 已创建新配置文件: {config_file}")
     attempts = 0
     while attempts <5 :
-        print("请选择配置模式:")
-        print(*[f"{i+1}.{choice}" for i,choice in enumerate(["快捷配置模式（模型的参数配置将使用默认值，如max_tokens、temperature、top_p；且无法自定义新API）","高级配置模式(可修改所有配置)"])], sep = "\n")
+        print("\n🔧 请选择配置模式:")
+        print("╔══════════════════════════════════════════════════╗")
+        print("║ 1. 快捷模式（使用推荐参数，适合快速启动）        ║")
+        print("║ 2. 高级模式（自定义所有参数，适合深度配置）      ║")
+        print("╚══════════════════════════════════════════════════╝")
+        #print(*[f"{i+1}.{choice}" for i,choice in enumerate(["快捷配置模式（模型的参数配置将使用默认值，如max_tokens、temperature、top_p；且无法自定义新API）","高级配置模式(可修改所有配置)"])], sep = "\n")
         simple_mode_choice = input("请输入对应序号(输入q以退出程序):").strip()
         if simple_mode_choice == "1":
             simple_mode = True
@@ -855,7 +829,7 @@ def edit_config(config_template, config_file, edit_new_config = False, simple_mo
             return False
         else:
             attempts += 1
-            logger.error(f'无效输入，请输入正确数字({attempts}/4)')
+            logger.error(f'✗... 无效输入，请输入正确数字({attempts}/4)')
     else:
         logger.error("✗... 超过最大重试次数")
         return False
@@ -892,7 +866,7 @@ def edit_config(config_template, config_file, edit_new_config = False, simple_mo
                         raise ValueError
                 except ValueError:
                     atmpt +=1
-                    logger.error(f"无效输入...请重新输入正确的数字({atmpt}/4)")
+                    logger.error(f"✗... 无效输入，请重新输入正确的数字({atmpt}/4)")
                     continue
                 
                 api_name = api_list[provider_choice_number - 1]
@@ -945,7 +919,7 @@ def edit_config(config_template, config_file, edit_new_config = False, simple_mo
                     except ValueError:
                         save_yaml(config_file,config_data)
                         return False
-                print("\n您的信息如下: ")
+                print("\n👀 您的信息如下: ")
                 print(f"您的用户名: {config_data['username']}")
                 print(f"您的Pubmed邮箱地址: {config_data['pubmed']['email']}")
                 print(f"您的API名称: {api_name}")
@@ -972,7 +946,7 @@ def edit_config(config_template, config_file, edit_new_config = False, simple_mo
                         break
                     else:
                         apt+=1
-                        logger.error(f"无效输入...请重新输入正确的数字或字母({apt}/4)")
+                        logger.error(f"✗... 无效输入，请重新输入正确的数字或字母({apt}/4)")
                 else:
                     logger.error("✗... 超过最大重试次数，请检查输入并重新运行程序")
                     save_yaml(config_file,config_data)
@@ -996,12 +970,12 @@ def input_username(config_data,template_data):
     attempts = 0
     while attempts <5:
         if old_username == default_username:
-            username = input(f"请输入您的用户名: ").strip()
+            username = input(f"🆔 请输入您的用户名: ").strip()
         else:
             username = input(f"已保存的用户名(回车Enter保存并继续，或直接输入新用户名):{old_username}\n")
         if not username :
             if old_username == default_username:
-                logger.error(f"无效输入...请输入有效用戶名({attempts+1}/4)")
+                logger.error(f"✗... 无效输入，请输入有效用戶名({attempts+1}/4)")
                 attempts += 1
                 continue
             else:
@@ -1018,12 +992,12 @@ def input_email(config_data,template_data):
     attempts = 0
     while attempts <5:
         if old_email == default_email:
-            email = input(f"请输入您的Pubmed邮箱地址: ").strip()
+            email = input(f"📧 请输入您的Pubmed邮箱地址: ").strip()
         else:
             email = input(f"已保存的邮箱地址(回车Enter保存并继续，或直接输入新用户名):{old_email}\n")
         if not email:
             if old_email == default_email:
-                logger.error(f"无效输入...请输入有效邮箱地址({attempts+1}/4)")
+                logger.error(f"✗... 无效输入，请输入有效邮箱地址({attempts+1}/4)")
                 attempts += 1
                 continue
             else:
@@ -1040,18 +1014,18 @@ def input_endpoint(api_name,config_data,template_data):
     attempts = 0
     while attempts <5:
         if default_endpoint == old_endpoint and default_endpoint != "https://default_endpoint.com":
-            endpoint = input(f"已保存的Endpoint为默认地址{default_endpoint}(回车Enter保存并继续，或直接输入新地址)\n")
+            endpoint = input(f"📍已保存的Endpoint为默认地址{default_endpoint}(回车Enter保存并继续，或直接输入新地址)\n")
             if not endpoint:
                 endpoint = default_endpoint
         elif default_endpoint == old_endpoint and default_endpoint == "https://default_endpoint.com":
-            endpoint = input(f"请输入您想使用的API地址（无默认端点，需手动添加！！）: ").strip()
+            endpoint = input(f"📍请输入您想使用的API地址（无默认端点，需手动添加！！）: ").strip()
         else:
-            endpoint = input(f"已保存API地址(回车Enter保存并继续，或直接输入新地址):{old_endpoint}\n").strip()
+            endpoint = input(f"📍已保存API地址(回车Enter保存并继续，或直接输入新地址):{old_endpoint}\n").strip()
             if not endpoint:
                 endpoint = old_endpoint
 
         if not endpoint or endpoint == "https://default_endpoint.com":
-            logger.error(f"无效输入...请输入有效API端点({attempts+1}/4)")
+            logger.error(f"✗... 无效输入,请输入有效API端点({attempts+1}/4)")
             attempts += 1
         else:
             break
@@ -1065,12 +1039,16 @@ def input_model(api_name,config_data,template_data):
     models = config_data['api'][api_name]['models']
     old_model = config_data['api'][api_name]['models']
     default_model = template_data['api'][api_name]['models']
+    print(f"\n🛠️ 正在配置 {api_name} 的模型接入点")  # 📝 添加步骤提示
+    print("温馨提示：")
+    print("- 每个API最多可配置5个模型ID")
+    print("- 按回车可以选择默认或跳过当前模型配置")
     attempts = 0
     while attempts < 5 and model_counter < 6:
         model_index = f"model_{model_counter}"
         print(f"\n默认模型{model_counter}接入点ID:{default_model[model_index]}")
         if old_model[model_index] == default_model[model_index] and default_model[model_index] != "No_default_model":
-            model_choice = input(f"请输入您想使用的模型{model_counter}接入点ID(最多输入5个)（回车Enter选择默认,或直接输入新ID）: ").strip()
+            model_choice = input(f"请输入您想使用的模型{model_counter}接入点ID回车Enter选择默认,或直接输入新ID）: ").strip()
             if model_choice == "No_default_model":
                 logger.error(f"\n请勿输入默认值！！！\n请输入有效模型接入点ID({attempts+1}/4)")
                 attempts += 1
@@ -1090,7 +1068,7 @@ def input_model(api_name,config_data,template_data):
         elif old_model[model_index] == default_model[model_index] and default_model[model_index] == "No_default_model":
             if old_model[model_index] == "No_default_model":
                 if model_counter == 1:
-                    model_choice = input(f"请输入您想使用的模型{model_counter}接入点ID(最多输入5个)（无默认模型，请手动添加）: ").strip()
+                    model_choice = input(f"请输入您想使用的模型{model_counter}接入点ID（无默认模型，请手动添加）: ").strip()
                     if model_choice == "No_default_model":
                         logger.error(f"\n请勿输入默认值！！！\n请输入有效模型接入点ID({attempts+1}/4)")
                         attempts += 1
@@ -1109,7 +1087,7 @@ def input_model(api_name,config_data,template_data):
                     else:
                         models[model_index]= model_choice
                 elif 1< model_counter <= 5:
-                    model_choice = input(f"请输入您想使用的模型{model_counter}接入点ID(最多输入5个)（无默认模型）,回车Enter进行下一步: ").strip()
+                    model_choice = input(f"请输入您想使用的模型{model_counter}接入点ID（无默认模型）,回车Enter进行下一步: ").strip()
                     if model_choice == "No_default_model":
                         logger.error(f"\n请勿输入默认值！！！\n请输入有效模型接入点ID({attempts+1}/4)")
                         attempts += 1
@@ -1151,6 +1129,7 @@ def input_model(api_name,config_data,template_data):
 def input_api_key(api_name,config_data,template_data):
     old_api_key = config_data['api'][api_name]["api_key"]
     default_api_key = template_data['api'][api_name]["api_key"]
+    print(f"\n🔑 正在配置 {api_name} 的API密钥")
     attempts = 0
     while attempts <5:
         if old_api_key == default_api_key:
@@ -1160,7 +1139,7 @@ def input_api_key(api_name,config_data,template_data):
             if not api_key:
                 api_key = old_api_key
         if not api_key:
-            logger.error(f"无效输入...请输入有效API_KEY({attempts+1}/4)")
+            logger.error(f"✗... 无效输入,请输入有效API_KEY({attempts+1}/4)")
             attempts += 1
         else:
             return api_key
@@ -1174,18 +1153,18 @@ def input_max_tokens(api_name,config_data,template_data):
     attempts = 0
     while attempts<5:
         if old_max_tokens == default_max_tokens:
-            max_tokens = input(f"请输入您的 {api_name} max_tokens（默认 {default_max_tokens}）,按回车Enter保存并继续: ").strip()
+            max_tokens = input(f"🛠️ 请输入您的 {api_name} max_tokens（默认 {default_max_tokens}）,按回车Enter保存并继续: ").strip()
             if not max_tokens:
                 max_tokens = default_max_tokens
         else:
-            max_tokens = input(f"已保存的{api_name} max_tokens(回车Enter保存并继续，或直接输入max_tokens):{old_max_tokens}\n")
+            max_tokens = input(f"🛠️ 已保存的{api_name} max_tokens(回车Enter保存并继续，或直接输入max_tokens):{old_max_tokens}\n")
             if not max_tokens:
                 max_tokens = old_max_tokens
         try:
             max_tokens = int(max_tokens)
             break
         except ValueError:
-            logger.error(f"无效输入...请输入有效数字({attempts+1}/4)")
+            logger.error(f"✗... 无效输入,请输入有效数字({attempts+1}/4)")
             attempts+=1
     else:
         logger.error("✗... 超过最大重试次数，请检查输入并重新运行程序")
@@ -1198,18 +1177,18 @@ def input_temperature(api_name,config_data,template_data):
     attempts = 0
     while attempts<5:
         if old_temperature == default_temperature:
-            temperature = input(f"请输入您的 {api_name} temperature（默认{default_temperature}）,按回车Enter保存并继续: ").strip()
+            temperature = input(f"🛠️ 请输入您的 {api_name} temperature（默认{default_temperature}）,按回车Enter保存并继续: ").strip()
             if not temperature:
                 temperature = default_temperature
         else:
-            temperature = input(f"已保存的{api_name} temperture(回车Enter保存并继续，或直接输入自定义temperature):{old_temperature}\n")
+            temperature = input(f"🛠️ 已保存的{api_name} temperture(回车Enter保存并继续，或直接输入自定义temperature):{old_temperature}\n")
             if not temperature:
                 temperature = old_temperature
         try:
             temperature = float(temperature)
             break
         except ValueError:
-            logger.error(f"无效输入...请输入有效数字({attempts+1}/4)")
+            logger.error(f"✗... 无效输入,请输入有效数字({attempts+1}/4)")
             attempts+=1
     else:
         logger.error("✗... 超过最大重试次数，请检查输入并重新运行程序")
@@ -1222,18 +1201,18 @@ def input_top_p(api_name,config_data,template_data):
     attempts = 0
     while attempts<5:
         if old_top_p == default_top_p:
-            top_p = input(f"请输入您的 {api_name} top_p（默认{default_top_p}），回车Enter保存并继续: ").strip()
+            top_p = input(f"🛠️ 请输入您的 {api_name} top_p（默认{default_top_p}），回车Enter保存并继续: ").strip()
             if not top_p:
                 top_p = default_top_p
         else:
-            top_p = input(f"已保存的{api_name} top_p(回车Enter保存并继续，或直接输入自定义top_p):{old_top_p}\n")
+            top_p = input(f"🛠️ 已保存的{api_name} top_p(回车Enter保存并继续，或直接输入自定义top_p):{old_top_p}\n")
             if not top_p:
                 top_p = old_top_p
         try:
             top_p = float(top_p)
             break
         except ValueError:
-            logger.error(f"无效输入...请输入有效数字({attempts+1}/4)")
+            logger.error(f"✗... 无效输入,请输入有效数字({attempts+1}/4)")
             attempts+=1
     else:
         logger.error("✗... 超过最大重试次数，请检查输入并重新运行程序")
@@ -1309,10 +1288,10 @@ def test_environment():
                         Failed_pkgs.append(pkg)
                         break
                     else:
-                        logger.error(f'无效输入，请输入 y 或 n ！（{attempts+1}/4）')
+                        logger.error(f'✗... 无效输入，请输入 y 或 n ！（{attempts+1}/4）')
                         attempts +=1
                 else:
-                    logger.error("无效输入...请重新输入正确的数字或字母")
+                    logger.error("✗... 无效输入,请重新输入正确的数字或字母")
         if Failed_pkgs:
             raise ImportError(Failed_pkgs)
 
@@ -1342,7 +1321,11 @@ def test_environment():
         plt.figure()
         plt.close()
         logger.info("✓... Matplotlib配置正常")
-        logger.info("\n✓... 环境测试全部通过！")
+        print("\n✅ 环境测试通过！")  # 📝 更醒目的成功提示
+        print("------------------------------")
+        print("所有依赖检查完成")
+        print("您现在可以正常运行程序")
+        print("------------------------------\n")
         return True
     except ImportError as e:
         if isinstance(e,list):
@@ -1357,7 +1340,14 @@ def test_environment():
         return False
 
 def main():
-    print("=== 开始配置PubMed文献分析系统 ===\n")
+    print("=== PubMed文献分析系统配置向导 ===")  # 📝 更专业的标题
+    print("          Version 1.0.0          ")
+    print("----------------------------------")
+    print("本向导将引导您完成以下步骤：")
+    print("1. 环境检查")
+    print("2. 依赖安装") 
+    print("3. 系统配置")
+    print("4. 完整性验证\n")
     
     # 切换到脚本所在目录
     os.chdir(SCRIPT_DIR)
